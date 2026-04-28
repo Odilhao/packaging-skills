@@ -20,7 +20,7 @@ Or install locally during development:
 
 ```bash
 # From this repository root
-lola mod add $(pwd)/packaging-skills
+lola mod add $(pwd)
 lola install packaging-skills
 ```
 
@@ -70,14 +70,16 @@ This module follows the lola module structure:
 ```
 packaging-skills/
 ├── README.md           # This file (repo documentation)
+├── LICENSE
 └── module/             # Lola-importable content
+    ├── AGENTS.md       # Module-level instructions
     ├── skills/
     │   └── obal/
-    │       └── SKILL.md
-    ├── commands/       # (empty - no custom commands)
-    ├── agents/         # (empty - no custom agents)
-    ├── mcps.json       # (empty - no MCP servers)
-    └── AGENTS.md       # Module-level instructions
+    │       ├── SKILL.md
+    │       └── references/
+    ├── commands/       # Custom commands (.gitkeep placeholder)
+    ├── agents/         # Specialized agents (.gitkeep placeholder)
+    └── mcps.json       # MCP server configurations
 ```
 
 ### Testing
