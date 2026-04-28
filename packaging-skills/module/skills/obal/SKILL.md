@@ -176,7 +176,7 @@ all:
 
 Then run: `obal scratch <package-name>`
 
-**IMPORTANT:** The `--copr-config` flag is ONLY for COPR builds. Koji/Brew builds are controlled by variables in `package_manifest.yaml`, not command-line flags.
+**IMPORTANT:** The `--copr-config` flag is ONLY for COPR builds. Koji builds (including Brew, Red Hat's downstream Koji instance) are controlled by variables in `package_manifest.yaml`, not command-line flags.
 
 After submitting, obal prints the build URL. **Save this URL and monitor the build** to verify success:
 - Check build logs for errors
@@ -241,12 +241,25 @@ This writes a changelog entry for the current version and release. Customize the
 obal changelog <package-name> --changelog "Fixed bug #12345"
 ```
 
-**When to use each:**
-- `obal update --version X.Y.Z` - automatically adds changelog entry
-- `obal update --version X.Y.Z --changelog "Custom message"` - updates with custom changelog
-- `obal changelog --changelog "Message"` - adds entry without updating version (rebuilds, patches)
+**Bumping release number:**
 
-### 8. Fetching Sources (git-annex)
+When rebuilding a package without changing the upstream version (adding patches, spec fixes, dependency changes):
+
+```bash
+obal bump-release <package-name> --changelog "Added patch for bug #12345"
+```
+
+This increments the Release field in the spec file and adds a changelog entry in one step.
+
+**When to use each:**
+- `obal update --version X.Y.Z` - automatically adds changelog entry for new upstream version
+- `obal update --version X.Y.Z --changelog "Custom message"` - updates with custom changelog
+- `obal bump-release --changelog "Message"` - increments release number and adds changelog (rebuilds, patches)
+- `obal changelog --changelog "Message"` - adds changelog entry only, without changing version or release
+
+### 8. Fetching Sources
+
+**git-annex repositories:**
 
 Some repositories use git-annex to store large source files. Retrieve sources:
 
@@ -255,6 +268,25 @@ obal source <package-name>
 ```
 
 This downloads source tarballs or gems from the remote git-annex repository. Required before building if sources aren't already present.
+
+**Rust packages (vendor tarballs):**
+
+For Rust packages that require vendor tarballs, you can fetch sources using `spectool`:
+
+```bash
+# List all sources defined in spec file
+spectool --list-files --all python-pysequoia.spec
+
+# Fetch only Source0 (PyPI/upstream tarball) - recommended for vendor workflow
+spectool --get-files --source 0 python-pysequoia.spec
+
+# Alternative: Download all available sources
+spectool --get-files --all python-pysequoia.spec
+```
+
+Use `--source 0` when building a vendor tarball for a new version (Source1 doesn't exist yet). The `--all` flag attempts to download all sources but shows 404 errors for missing vendor tarballs.
+
+After fetching Source0, extract and create the vendor tarball using the Rust vendor workflow documented in your repository.
 
 ## Common Workflow Patterns
 
@@ -266,7 +298,7 @@ This downloads source tarballs or gems from the remote git-annex repository. Req
 
 ```markdown
 - [ ] Update to new version: `obal update mypackage --version 2.3.4`
-- [ ] Lint first (fast error detection): `obal lint mypackage`
+- [ ] Lint (fast error detection): `obal lint mypackage`
 - [ ] Review changes: `git diff`
 - [ ] Quick local build: `obal mock mypackage`
 ```
@@ -327,7 +359,12 @@ This downloads source tarballs or gems from the remote git-annex repository. Req
 **Copy this checklist:**
 
 ```markdown
-- [ ] Fetch the PR: `gh pr checkout <pr-number>`
+- [ ] Create worktree for PR testing:
+      ```bash
+      git fetch origin pull/<pr-number>/head:pr-<pr-number>
+      git worktree add ../packaging-pr-<pr-number> pr-<pr-number>
+      cd ../packaging-pr-<pr-number>
+      ```
 - [ ] Identify changed packages:
       ```bash
       git diff --name-only origin/develop | grep package_manifest.yaml || \
@@ -338,18 +375,53 @@ This downloads source tarballs or gems from the remote git-annex repository. Req
   - [ ] Local build: `obal mock <package-name>` OR
   - [ ] Scratch build: `obal scratch <package-name>`
 - [ ] Verify builds succeed and add review comments to PR
+- [ ] Clean up worktree:
+      ```bash
+      cd ../packaging-repo
+      git worktree remove ../packaging-pr-<pr-number>
+      git branch -d pr-<pr-number>
+      ```
 ```
 
 **Why this workflow:** PR testing catches integration issues before merging. Running lint and builds on changed packages ensures the PR doesn't break existing functionality.
 
 ## Safety Guardrails
 
+### Branch Rules (NON-NEGOTIABLE)
+
+**NEVER push directly to the base branch** (rpm/develop, develop, main, master):
+- All changes go through feature branch + pull request, no exceptions
+- This includes: spec fixes, Release bumps, BuildRequires changes, dependency fixes, vendor tarballs
+- Branch naming conventions:
+  - `bump_rpm/<package>` - for version bumps
+  - `fix/<description>` - for spec file fixes
+  - `add_package/<package>` - for new packages
+
+**Why this rule exists:** Direct pushes to the base branch bypass CI validation, code review, and the opportunity to catch issues before they affect all developers. Even "simple" one-line fixes have caused production issues when pushed directly.
+
+### CI Re-trigger Pattern
+
+When CI needs a re-run (transient failure, dependency just merged):
+
+**ALWAYS:**
+```bash
+git commit --amend --no-edit
+git push <remote> <branch> --force
+```
+
+**NEVER:**
+```bash
+git commit --allow-empty -m "Trigger CI"  # Pollutes history
+```
+
+**Why:** Empty commits clutter the git history with non-functional noise. Force-pushing an amended commit keeps history clean while achieving the same CI re-trigger.
+
 ### Destructive Operations Require Approval
 
 **Block these operations unless explicitly requested:**
 - `obal release` - publishes to production repositories
 - Any operation with `--copr-rebuild` - forces rebuild of existing packages
-- Operations targeting Brew/Koji without clear user intent
+- Operations targeting Koji (including Brew) without clear user intent
 
 **Before running destructive operations:**
 1. Summarize what will happen: "This will release `package-name` version `X.Y.Z` to `target-repository`"
