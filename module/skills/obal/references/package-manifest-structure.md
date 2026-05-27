@@ -139,7 +139,7 @@ all:
     copr_project_user: "@theforeman"  # COPR project owner
     
     # Koji-specific settings
-    build_package_koji_command: koji  # Command to use: 'koji' or 'brew'
+    build_package_koji_command: koji
 
 # COPR project configuration
 copr_projects:

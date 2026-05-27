@@ -10,7 +10,14 @@ RPM packaging workflow automation for Foreman, Katello, and Pulp projects using 
 
 ### packaging-systems-thinker
 **Triggers:** dependency analysis, version planning, rebuild cascades, ABI/API changes, new package creation, security patches, major version updates
-**Use for:** Shifting perspective from individual packages to the packaging ecosystem. Provides mental models for dependency graphs, version constraint matrices, rebuild cascade planning, and upstream-to-user pipelines. Pair with obal for the full picture — systems-thinker for the "how to think" and obal for the "how to do."
+**Use for:** Reasoning about packaging as a system — dependency graphs, version constraint matrices, rebuild cascade planning, upstream-to-user pipelines. This skill provides interpretation and planning only, not commands. Activate after obal has identified the task; use systems-thinker to understand impact and plan the approach.
+
+## Agents
+
+### rpm-packager
+**Use for:** End-to-end packaging automation in obal-managed repos. Wires together obal (commands) and packaging-systems-thinker (reasoning) with authority boundaries and a mandatory review gate before commits.
+
+See [agents/rpm-packager.md](agents/rpm-packager.md) for the full agent definition.
 
 ## Conventions
 

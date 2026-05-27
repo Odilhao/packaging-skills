@@ -1,13 +1,12 @@
 # Build System Configuration
 
-Configure which build system obal uses for package builds: COPR (default), Koji, or Brew.
+Configure which build system obal uses for package builds: COPR (default) or Koji.
 
 ## Table of Contents
 - [Build System Configuration](#build-system-configuration)
   - [Table of Contents](#table-of-contents)
   - [COPR (Default)](#copr-default)
   - [Koji](#koji)
-  - [Brew (Red Hat Internal)](#brew-red-hat-internal)
   - [Switching Between Build Systems](#switching-between-build-systems)
   - [Advanced Build Configuration](#advanced-build-configuration)
     - [Custom Copr Chroot](#custom-copr-chroot)
@@ -45,7 +44,7 @@ token = test-token-here
 copr_url = https://copr.fedorainfracloud.org
 ```
 
-The `--copr-config` command-line flag is ONLY for COPR builds to specify a custom credentials file. It does NOT configure Koji or Brew builds. Koji/Brew configuration is always done via package_manifest.yaml variables.
+The `--copr-config` command-line flag is ONLY for COPR builds to specify a custom credentials file. It does NOT configure Koji builds. Koji configuration is always done via package_manifest.yaml variables.
 
 ## Koji
 
@@ -67,22 +66,6 @@ obal release mypackage   # Releases to Koji
 
 **Authentication:** Requires certificates in `~/.koji/config` (see [Authentication Setup](authentication.md)).
 
-## Brew (Red Hat Internal)
-
-Brew uses the same configuration as Koji but with a different command:
-
-**package_manifest.yaml configuration:**
-```yaml
-all:
-  vars:
-    build_package_build_system: koji
-    build_package_koji_command: brew   # Use 'brew' instead of 'koji'
-```
-
-**Authentication:** Requires Kerberos ticket + certificates in `~/.brewkoji/config` (see [Authentication Setup](authentication.md)).
-
-**IMPORTANT:** There is NO `--copr-config` flag for Koji or Brew builds. The `--copr-config` flag is exclusively for COPR and will be ignored when `build_package_build_system: koji` is set.
-
 ## Switching Between Build Systems
 
 To build with Koji instead of COPR, modify the group variables in package_manifest.yaml:
@@ -91,7 +74,7 @@ To build with Koji instead of COPR, modify the group variables in package_manife
 all:
   vars:
     build_package_build_system: koji
-    build_package_koji_command: koji  # or 'brew' for Brew
+    build_package_koji_command: koji
 ```
 
 Then run normal obal commands—they will automatically use Koji:
@@ -122,7 +105,7 @@ obal release <package> --copr-chroot rhel-10-x86_64
 - Testing compatibility with different OS versions
 - Building for specific architectures
 
-**Note:** This flag only works with COPR builds. Koji/Brew target selection is controlled through package_manifest.yaml variables.
+**Note:** This flag only works with COPR builds. Koji target selection is controlled through package_manifest.yaml variables.
 
 ### Skip Build Checks
 

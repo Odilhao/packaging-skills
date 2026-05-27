@@ -77,7 +77,11 @@ None currently. Custom commands can be added to `module/commands/`.
 
 ### Agents
 
-None currently. Specialized agents can be added to `module/agents/`.
+#### rpm-packager
+End-to-end packaging automation that wires obal and packaging-systems-thinker together with authority boundaries and a mandatory review gate before commits.
+
+- Autonomous: version bumps, lint/mock/scratch builds, dependency alignment
+- Requires approval: new dependencies, license changes, production releases
 
 ### MCP Servers
 
@@ -98,9 +102,11 @@ packaging-skills/
     │   │   ├── references/ # Deep-dive reference docs
     │   │   └── scripts/    # Helper scripts
     │   └── packaging-systems-thinker/
-    │       └── SKILL.md    # Packaging systems thinking framework
+    │       ├── SKILL.md    # Packaging systems thinking framework
+    │       └── references/ # Scenario examples
     ├── commands/           # Custom commands (placeholder)
-    └── agents/             # Specialized agents (placeholder)
+    └── agents/
+        └── rpm-packager.md # Packaging automation agent
 ```
 
 ## Contributing

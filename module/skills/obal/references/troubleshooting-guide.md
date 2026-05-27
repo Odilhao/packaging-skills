@@ -13,7 +13,7 @@ Comprehensive troubleshooting for obal setup, build failures, authentication, an
   - [Repoclosure Fails](#repoclosure-fails)
 - [Authentication Issues](#authentication-issues)
   - [COPR Authentication](#copr-authentication)
-  - [Brew/Koji Authentication](#brewkoji-authentication)
+  - [Koji Authentication](#koji-authentication)
 - [Common Errors](#common-errors)
 
 ## Setup Issues
@@ -92,7 +92,7 @@ sudo dnf install git-annex
 **Symptoms:** COPR or Koji scratch build fails.
 
 **Troubleshooting steps:**
-1. Check build logs at the COPR/Brew URL (provided in obal output)
+1. Check build logs at the COPR/Koji URL (provided in obal output)
 2. Verify dependencies are available in target repos
 3. Run `obal repoclosure` to check missing deps
 4. Compare working builds to identify what changed
@@ -131,19 +131,11 @@ sudo dnf install git-annex
 - Verify config file exists: `~/.config/copr`
 - May need API token for certain operations (configured in COPR settings)
 
-### Brew/Koji Authentication
-
-**Error:** `krb5.GSSError: Unspecified GSS failure`
-
-**Solutions:**
-- Obtain Kerberos ticket: `kinit username@REDHAT.COM`
-- Verify ticket: `klist` (should show valid ticket)
-- Check network access to Brew servers
-- Renew expired ticket: `kinit -R`
+### Koji Authentication
 
 **Configuration verification:**
-- Check credentials are configured: `~/.koji/config` or `~/.brewkoji/config`
-- Verify Kerberos ticket is valid and not expired
+- Check credentials are configured: `~/.koji/config`
+- Verify certificates are valid and not expired
 
 ## Common Errors
 
