@@ -113,7 +113,10 @@ packaging-skills/
 
 1. Create a feature branch
 2. Make changes under `module/`
-3. Verify no downstream references: `grep -ri 'brew\|satellite-packaging\|kinit\|kerberos' module/`
+3. Verify no downstream references (includes all skills, agents, and docs):
+   ```bash
+   grep -ri 'brew\|satellite-packaging\|candlepin-packaging\|kinit\|kerberos' module/
+   ```
 4. Test locally with `lola mod add $(pwd) && lola install packaging-skills`
 5. Submit a pull request
 

@@ -31,13 +31,17 @@ description: "Packaging automation for obal-managed repos (foreman-packaging, pu
 Before staging any spec change, dispatch a **pair review** — a second agent instance verifies the diff independently. The proposing agent MUST NOT self-verify; a separate reviewing agent catches errors the proposer introduced.
 
 **Reviewing agent prompt:**
-> Review this diff against upstream dependency metadata. Check:
+> Review this diff against upstream dependency metadata and the packaging project's build environment. Check:
 > 1. Do all Requires/BuildRequires bounds match upstream exactly (PyPI JSON API, Cargo.toml, gemspec)?
-> 2. Is the Release field correct (reset to 1 for version bumps, incremented with `obal bump-release` for dep-only fixes)?
-> 3. Are source files git-annex symlinks (`lrwxrwxrwx`), not plain files (`rw-r--r--`)?
-> 4. Are there stale deps that weren't updated alongside the version bump?
+> 2. Are new Requires/BuildRequires available in the build repos configured for this project:
+>    - **foreman-packaging**: https://github.com/theforeman/foreman-packaging/blob/rpm/develop/mock/el9.cfg
+>    - **pulpcore-packaging**: https://github.com/theforeman/pulpcore-packaging/blob/rpm/develop/mock/el8.cfg
+>    - **candlepin-packaging**: https://github.com/theforeman/candlepin-packaging/blob/rpm/develop/repoclosure/yum.conf
+> 3. Is the Release field correct (reset to 1 for version bumps, incremented with `obal bump-release` for dep-only fixes)?
+> 4. Are source files git-annex symlinks (`lrwxrwxrwx`), not plain files (`rw-r--r--`)?
+> 5. Are there stale deps that weren't updated alongside the version bump?
 >
-> If item 3 fails, remediate before committing:
+> If item 4 fails, remediate before committing:
 > ```bash
 > git rm --cached packages/<pkg>/<tarball-file>
 > rm packages/<pkg>/<tarball-file>
