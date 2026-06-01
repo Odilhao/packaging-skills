@@ -1,33 +1,36 @@
 # Packaging Skills
 
-RPM packaging workflow automation skills for Foreman, Katello, Pulp, and Satellite projects.
+RPM packaging workflow automation for Foreman, Katello, and Pulp projects using community tools.
 
-## When to Use
+## Skills
 
-- **obal**: Use the `obal` skill for RPM packaging workflows in repositories like foreman-packaging, pulpcore-packaging, satellite-packaging, and candlepin-packaging. Automatically triggers when:
-  - User mentions obal, COPR, Koji, or Brew
-  - Working with package updates, version bumps, or spec files
-  - Running builds (scratch, mock, release)
-  - Verifying dependencies with repoclosure
-  - Testing packaging pull requests
-  - Generating changelogs for package updates
+### obal
+**Triggers:** mentions of obal, COPR, Koji, package updates, spec files, RPM builds, packaging repository operations
+**Use for:** Orchestrating RPM packaging workflows — version updates, mock/scratch/release builds, dependency verification with repoclosure, changelog generation, and PR testing in obal-managed repositories (foreman-packaging, pulpcore-packaging).
 
-## Configuration
+### packaging-systems-thinker
+**Triggers:** dependency analysis, version planning, rebuild cascades, ABI/API changes, new package creation, security patches, major version updates
+**Use for:** Reasoning about packaging as a system — dependency graphs, version constraint matrices, rebuild cascade planning, upstream-to-user pipelines. This skill provides interpretation and planning only, not commands. Activate after obal has identified the task; use systems-thinker to understand impact and plan the approach.
 
-No additional configuration required. The obal skill includes:
-- Safety guardrails for destructive git operations
-- Release approval gates (prevents unauthorized production releases)
-- Best practices for RPM packaging workflows
-- Integration with COPR, Koji, and Brew build systems
+## Agents
 
-## Notes
+### rpm-packager
+**Use for:** End-to-end packaging automation in obal-managed repos. Wires together obal (commands) and packaging-systems-thinker (reasoning) with authority boundaries and a mandatory review gate before commits.
 
-The obal skill provides comprehensive guidance for:
-- Package version updates and spec file modifications
-- Local mock builds for rapid iteration
-- Scratch builds on COPR for testing before release
-- Dependency verification with repoclosure
-- Full release workflow with changelog generation
-- Pull request testing workflows
+See [agents/rpm-packager.md](agents/rpm-packager.md) for the full agent definition.
 
-All operations include location verification to prevent accidental destructive operations in wrong directories.
+## Conventions
+
+All content in this module is 100% upstream. Only community tools: COPR, Koji, obal, tito, GitHub, Fedora packaging guidelines. No internal build systems, authentication, or proprietary tooling.
+
+### Repository Detection
+
+Before running packaging commands, verify you're in an obal-managed repository:
+
+```bash
+ls package_manifest.yaml
+```
+
+Common repositories:
+- `foreman-packaging` — Foreman and Katello packages
+- `pulpcore-packaging` — Pulp server packages

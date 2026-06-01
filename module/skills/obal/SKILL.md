@@ -1,6 +1,6 @@
 ---
 name: "obal"
-description: "Orchestrate RPM packaging workflows with obal for repositories like foreman-packaging, pulpcore-packaging, and satellite-packaging. Use when updating package versions, running builds (scratch, mock, release), verifying dependencies with repoclosure, linting spec files, or generating changelogs. Provides safety guardrails for destructive operations and release approval gates."
+description: "Orchestrate RPM packaging workflows with obal for repositories like foreman-packaging and pulpcore-packaging. Use when updating package versions, running builds (scratch, mock, release), verifying dependencies with repoclosure, linting spec files, or generating changelogs. Provides safety guardrails for destructive operations and release approval gates."
 ---
 
 # obal Packaging Workflow Skill
@@ -11,7 +11,7 @@ obal is an Ansible-based orchestrator for RPM packaging repositories. It wraps c
 
 **New to obal?** See reference documentation:
 - [Installation](references/installation.md) - Installing obal
-- [Authentication](references/authentication.md) - COPR/Koji/Brew setup  
+- [Authentication](references/authentication.md) - COPR/Koji setup  
 - [Repository Structure](references/repository-structure.md) - Packaging repo anatomy
 
 **Always execute obal commands from the repository root directory**, not from package subdirectories. The repository root contains `package_manifest.yaml` which defines all packages and their metadata.
@@ -41,7 +41,6 @@ basename $(pwd)
 Common obal-managed repositories:
 - `foreman-packaging` - Foreman and Katello packages
 - `pulpcore-packaging` - Pulp packages
-- `satellite-packaging` - Red Hat Satellite packages
 - `candlepin-packaging` - Candlepin packages
 
 ## CRITICAL: Git/GitHub Operations Location Safety
@@ -171,12 +170,12 @@ Requires `package_manifest.yaml` to specify:
 all:
   vars:
     build_package_build_system: koji
-    build_package_koji_command: koji  # or 'brew' for Brew
+    build_package_koji_command: koji
 ```
 
 Then run: `obal scratch <package-name>`
 
-**IMPORTANT:** The `--copr-config` flag is ONLY for COPR builds. Koji builds (including Brew, Red Hat's downstream Koji instance) are controlled by variables in `package_manifest.yaml`, not command-line flags.
+**IMPORTANT:** The `--copr-config` flag is ONLY for COPR builds. Koji builds are controlled by variables in `package_manifest.yaml`, not command-line flags.
 
 After submitting, obal prints the build URL. **Save this URL and monitor the build** to verify success:
 - Check build logs for errors
@@ -421,7 +420,7 @@ git commit --allow-empty -m "Trigger CI"  # Pollutes history
 **Block these operations unless explicitly requested:**
 - `obal release` - publishes to production repositories
 - Any operation with `--copr-rebuild` - forces rebuild of existing packages
-- Operations targeting Koji (including Brew) without clear user intent
+- Operations targeting Koji without clear user intent
 
 **Before running destructive operations:**
 1. Summarize what will happen: "This will release `package-name` version `X.Y.Z` to `target-repository`"
@@ -460,14 +459,14 @@ ansible-inventory -i package_manifest.yaml --host mypackage
 
 **Quick diagnostics:**
 - Build fails: Check BuildRequires, verify Source0 URL, review logs
-- Authentication error: Verify config files and credentials (COPR/Koji/Brew)
+- Authentication error: Verify config files and credentials (COPR/Koji)
 - Package not found: Check spelling, see [Package Manifest Structure](references/package-manifest-structure.md#listing-all-packages) for how to list all packages
 - Not in git repository: Change to repository root directory
 
 **For detailed troubleshooting:** See [Troubleshooting Guide](references/troubleshooting-guide.md) covering:
 - Setup issues (permissions, authentication, repository detection)
 - Build failures (mock, scratch, repoclosure)
-- Authentication problems (COPR, Koji, Brew)
+- Authentication problems (COPR, Koji)
 - Common errors and solutions
 
 ## Advanced Operations
@@ -493,7 +492,7 @@ For advanced operations, see:
 
 7. **Monitor build URLs** - Always check build logs for warnings even on successful builds
 
-8. **Understand your target** - Know whether you're building for COPR (upstream) or Brew (downstream)
+8. **Understand your target** - Know whether you're building for COPR or Koji
 
 9. **Respect release gates** - Never bypass safety checks for release builds without understanding why
 
@@ -502,7 +501,7 @@ For advanced operations, see:
 ## When to Use This Skill
 
 **Trigger this skill when the user:**
-- Mentions obal, COPR, Koji, Brew, or packaging repositories (foreman-packaging, pulpcore-packaging, etc.)
+- Mentions obal, COPR, Koji, or packaging repositories (foreman-packaging, pulpcore-packaging, etc.)
 - Works with package updates, RPM builds, spec files, or package manifests
 - Asks about dependency verification, changelogs, or package testing
 - Reviews or tests packaging pull requests
@@ -513,7 +512,7 @@ For advanced operations, see:
 
 ### Setup & Configuration
 - [Installation](references/installation.md) - Installing obal and dependencies
-- [Authentication](references/authentication.md) - COPR, Koji, and Brew setup
+- [Authentication](references/authentication.md) - COPR and Koji setup
 - [Repository Structure](references/repository-structure.md) - Packaging repository anatomy
 - [Package Manifest](references/package-manifest-structure.md) - Understanding package_manifest.yaml
 - [Build System Config](references/build-system-config.md) - Configuring build targets

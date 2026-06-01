@@ -1,16 +1,31 @@
 # Packaging Skills
 
-AI agent skills for RPM packaging workflows with obal, COPR, Koji, and Brew.
+AI agent skills for RPM packaging workflows with obal, COPR, Koji, and community packaging tools.
 
 ## Overview
 
-This lola module provides comprehensive skills for working with RPM packaging repositories used in Foreman, Katello, Pulp, and Satellite projects. It enables AI assistants to safely orchestrate common packaging operations with built-in safety guardrails.
+This [lola](https://lobstertrap.org/lola/) module provides skills for working with RPM packaging repositories used in Foreman, Katello, and Pulp projects. It enables AI assistants to safely orchestrate common packaging operations with built-in safety guardrails.
+
+All content is 100% upstream — only community tools and open source workflows.
+
+## Prerequisites
+
+- [obal](https://github.com/theforeman/obal) — Ansible-based RPM packaging orchestrator
+- [copr-cli](https://docs.pagure.org/copr.copr/) — COPR build system client
+- [gh](https://cli.github.com/) — GitHub CLI
+- [git-annex](https://git-annex.branchable.com/) — Large file management for packaging repos
+- `curl`, `jq` — Standard CLI utilities
 
 ## Installation
 
 ```bash
-# Add to lola registry
-lola mod add https://github.com/theforeman/packaging-skills
+# Install lola
+pip install lola-ai
+# or
+uv tool install lola-ai
+
+# Add the module
+lola mod add https://github.com/Odilhao/packaging-skills.git
 
 # Install to a project
 lola install packaging-skills
@@ -29,9 +44,8 @@ lola install packaging-skills
 ### Skills
 
 #### obal
-Orchestrates RPM packaging workflows for repositories like foreman-packaging, pulpcore-packaging, satellite-packaging, and candlepin-packaging.
+Orchestrates RPM packaging workflows for obal-managed repositories like foreman-packaging and pulpcore-packaging.
 
-**Features:**
 - Package version updates with automatic spec file modification
 - Local mock builds for rapid testing
 - Scratch builds on COPR for pre-release verification
@@ -40,16 +54,22 @@ Orchestrates RPM packaging workflows for repositories like foreman-packaging, pu
 - Changelog generation
 - Pull request testing workflows
 
-**Safety Features:**
-- Location verification before git operations (prevents destructive operations in wrong directory)
+**Safety features:**
+- Location verification before git operations
 - Release approval gates (prevents unauthorized production releases)
-- Best practices enforcement
 
-**Auto-triggers when:**
-- User mentions obal, COPR, Koji, or Brew
-- Working with package updates or spec files
-- Running builds or verifying dependencies
-- Testing packaging pull requests
+**Auto-triggers when:** user mentions obal, COPR, Koji, package updates, spec files, or RPM builds.
+
+#### packaging-systems-thinker
+A thinking framework for seeing software packaging as interconnected systems rather than individual packages.
+
+- Dependency graph analysis (build vs runtime, direct vs transitive)
+- Version constraint matrices and compatibility windows
+- Rebuild cascade planning before making changes
+- Upstream-to-user pipeline understanding
+- Packaging trade-off analysis (bundling, subpackages, linking)
+
+**Auto-triggers when:** analyzing dependencies, planning version bumps, debugging build failures, assessing ABI/API changes, or creating new packages.
 
 ### Commands
 
@@ -57,45 +77,57 @@ None currently. Custom commands can be added to `module/commands/`.
 
 ### Agents
 
-None currently. Specialized agents can be added to `module/agents/`.
+#### rpm-packager
+End-to-end packaging automation that wires obal and packaging-systems-thinker together with authority boundaries and a mandatory review gate before commits.
+
+- Autonomous: version bumps, lint/mock/scratch builds, dependency alignment
+- Requires approval: new dependencies, license changes, production releases
 
 ### MCP Servers
 
 None currently. MCP server configurations can be added to `module/mcps.json`.
 
-## Development
-
-This module follows the lola module structure:
+## Directory Structure
 
 ```
 packaging-skills/
-├── README.md           # This file (repo documentation)
+├── README.md               # This file
 ├── LICENSE
-└── module/             # Lola-importable content
-    ├── AGENTS.md       # Module-level instructions
+└── module/                 # Lola-importable content
+    ├── AGENTS.md           # Module-level context and orchestration
+    ├── mcps.json           # MCP server configs (empty)
     ├── skills/
-    │   └── obal/
-    │       ├── SKILL.md
-    │       └── references/
-    ├── commands/       # Custom commands (.gitkeep placeholder)
-    ├── agents/         # Specialized agents (.gitkeep placeholder)
-    └── mcps.json       # MCP server configurations
+    │   ├── obal/
+    │   │   ├── SKILL.md    # obal packaging workflow skill
+    │   │   ├── references/ # Deep-dive reference docs
+    │   │   └── scripts/    # Helper scripts
+    │   └── packaging-systems-thinker/
+    │       ├── SKILL.md    # Packaging systems thinking framework
+    │       └── references/ # Scenario examples
+    ├── commands/           # Custom commands (placeholder)
+    └── agents/
+        └── rpm-packager.md # Packaging automation agent
 ```
 
-### Testing
-
-The skill has been validated through comprehensive evaluations:
-- Iteration 2 achieved 100% pass rate across all test scenarios
-- Git safety guardrails verified to prevent destructive operations
-- Release approval gates confirmed working
-
-### Contributing
+## Contributing
 
 1. Create a feature branch
-2. Make changes to `module/skills/obal/SKILL.md` or add new components
-3. Test locally with `lola install packaging-skills`
-4. Submit a pull request
+2. Make changes under `module/`
+3. Verify no downstream references (includes all skills, agents, and docs):
+   ```bash
+   grep -ri 'brew\|satellite-packaging\|candlepin-packaging\|kinit\|kerberos' module/
+   ```
+4. Test locally with `lola mod add $(pwd) && lola install packaging-skills`
+5. Submit a pull request
+
+## Resources
+
+- [Lola documentation](https://lobstertrap.org/lola/)
+- [Module creation guide](https://lobstertrap.org/lola/guides/creating-modules/)
+- [Skill format](https://lobstertrap.org/lola/guides/skill-format/)
+- [obal](https://github.com/theforeman/obal)
+- [Fedora Packaging Guidelines](https://docs.fedoraproject.org/en-US/packaging-guidelines/)
 
 ## License
 
-Apache License 2.0 - See LICENSE file for details.
+Apache License 2.0 — See LICENSE file for details.
