@@ -44,7 +44,7 @@ lola install packaging-skills
 ### Skills
 
 #### obal
-Orchestrates RPM packaging workflows for obal-managed repositories like foreman-packaging and pulpcore-packaging.
+Orchestrates RPM packaging workflows for obal-managed repositories like foreman-packaging.
 
 - Package version updates with automatic spec file modification
 - Local mock builds for rapid testing
@@ -59,6 +59,28 @@ Orchestrates RPM packaging workflows for obal-managed repositories like foreman-
 - Release approval gates (prevents unauthorized production releases)
 
 **Auto-triggers when:** user mentions obal, COPR, Koji, package updates, spec files, or RPM builds.
+
+#### copr-cli
+Inspect COPR build status, fetch logs, and classify build failures.
+
+- Build status checking and monitoring
+- Log retrieval and analysis
+- Failure classification and troubleshooting
+- Real-world error patterns (timeouts, architecture failures, missing macros)
+- COPR project reference and permissions
+
+**Auto-triggers when:** debugging build failures, monitoring builds, analyzing logs, or researching package build issues in Fedora or upstream packaging.
+
+#### packaging-repositories
+Work with obal-managed packaging repositories: understand structure, edit specs, manage sources with git-annex.
+
+- Repository structure and branch naming conventions
+- 6 package types: Ruby gems, Python, Node.js, Ansible collections, Go, SCL
+- Manual spec file editing workflows
+- git-annex integration (defers source management to obal)
+- Advanced patterns: Epoch, conditional dependencies, Satellite-specific builds, vendor tarballs
+
+**Auto-triggers when:** working with foreman-packaging, understanding repo structure, editing specs, managing dependencies, or handling different package types.
 
 #### packaging-systems-thinker
 A thinking framework for seeing software packaging as interconnected systems rather than individual packages.
@@ -99,8 +121,18 @@ packaging-skills/
     ├── skills/
     │   ├── obal/
     │   │   ├── SKILL.md    # obal packaging workflow skill
-    │   │   ├── references/ # Deep-dive reference docs
+    │   │   ├── references/ # Deep-dive reference docs (12 files)
     │   │   └── scripts/    # Helper scripts
+    │   ├── copr-cli/
+    │   │   ├── SKILL.md    # COPR build inspection and monitoring
+    │   │   └── references/
+    │   │       └── copr-projects.md # COPR projects and permissions
+    │   ├── packaging-repositories/
+    │   │   ├── SKILL.md    # Work with foreman-packaging repository
+    │   │   └── references/
+    │   │       ├── spec-file-reference.md      # Complete spec anatomy
+    │   │       ├── package-types-guide.md      # 6 package types
+    │   │       └── advanced-patterns.md        # Epoch, vendors, etc.
     │   └── packaging-systems-thinker/
     │       ├── SKILL.md    # Packaging systems thinking framework
     │       └── references/ # Scenario examples
