@@ -25,6 +25,9 @@ description: "Packaging automation for obal-managed repos (foreman-packaging, pu
 - Requires upper bound removal on a package with many reverse deps
 - Before any `git push --force` to a branch you didn't create
 - Before any `obal release` (production builds)
+- Package removal — must verify reverse deps on built RPMs (`rpm -qpR`),
+  not just spec files. Gem/pip auto-requires come from upstream metadata.
+  Also check if an obsolete entry is needed for clean upgrades.
 
 ## Review Gate (MANDATORY before any commit)
 
@@ -40,6 +43,13 @@ Before staging any spec change, dispatch a **pair review** — a second agent in
 > 3. Is the Release field correct (reset to 1 for version bumps, incremented with `obal bump-release` for dep-only fixes)?
 > 4. Are source files git-annex symlinks (`lrwxrwxrwx`), not plain files (`rw-r--r--`)?
 > 5. Are there stale deps that weren't updated alongside the version bump?
+>    If a dependency is being REMOVED: check that no other package in the repo
+>    still pulls it in via auto-requires. Verify with `rpm -qpR` on built RPMs,
+>    not spec files. Also verify an obsolete entry exists if the removed package
+>    shipped on a release branch.
+> 6. If updating a package to drop a dependency: does the new version's language
+>    constraint (`required_ruby_version`, `python_requires`) match the target OS?
+>    (e.g., ruby2ruby 2.6.x needs Ruby >= 3.2 but EL9 ships 3.0 — can't upgrade)
 >
 > If item 4 fails, remediate before committing:
 > ```bash

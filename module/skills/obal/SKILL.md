@@ -90,7 +90,13 @@ obal update <package-name> --version <version-number> --commit
 - Release field is reset to 1
 - Source0 URL resolves correctly
 - BuildRequires match upstream dependencies (setup.cfg/pyproject.toml/requirements.txt for Python; .gemspec/Gemfile for Ruby)
+- Upstream language version constraint is compatible with target OS:
+  - Ruby: check `required_ruby_version` in gemspec (EL9 ships Ruby 3.0)
+  - Python: check `python_requires` in pyproject.toml/setup.cfg
 - Changelog entry was auto-generated (unless you provided `--changelog`)
+- Source files are git-annex symlinks (`lrwxrwxrwx`), not binary blobs (`-rw-r--r--`).
+  Verify with: `git diff --cached | grep "^new file mode"` — must show `120000`.
+  If binary, fix: `git reset HEAD <file> && git annex add <file> && git add <file>`
 
 **Always review the diff before committing** to catch issues early:
 ```bash
@@ -176,6 +182,10 @@ all:
 Then run: `obal scratch <package-name>`
 
 **IMPORTANT:** The `--copr-config` flag is ONLY for COPR builds. Koji builds are controlled by variables in `package_manifest.yaml`, not command-line flags.
+
+**Before scratch builds with new annex sources:** Run `obal source <package-name>` first.
+Mock builds resolve annex internally, but scratch builds copy to a temp directory
+where unresolved symlinks cause "Bad file: No such file or directory" SRPM build errors.
 
 After submitting, obal prints the build URL. **Save this URL and monitor the build** to verify success:
 - Check build logs for errors
