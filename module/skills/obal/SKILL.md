@@ -472,6 +472,8 @@ ansible-inventory -i package_manifest.yaml --host mypackage
 - Authentication error: Verify config files and credentials (COPR/Koji)
 - Package not found: Check spelling, see [Package Manifest Structure](references/package-manifest-structure.md#listing-all-packages) for how to list all packages
 - Not in git repository: Change to repository root directory
+- Nightly pipeline failed: Manually release packages in dependency order — see [Release Recovery](references/release-recovery.md)
+- Unwanted gem dependency: Strip it with `%gemspec_remove_dep` — see [Gemspec Patching](references/gemspec-patching.md)
 
 **For detailed troubleshooting:** See [Troubleshooting Guide](references/troubleshooting-guide.md) covering:
 - Setup issues (permissions, authentication, repository detection)

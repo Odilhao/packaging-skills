@@ -132,8 +132,10 @@ With packaging systems thinking:
     - Ruby: `required_ruby_version` in gemspec (e.g., ruby2ruby 2.6.x
       needs Ruby >= 3.2, but EL9 ships Ruby 3.0 — can't upgrade)
     - Python: `python_requires` in pyproject.toml/setup.cfg
-    - If the new version is incompatible, the removal may need to be
-      deferred until the target OS ships a compatible language runtime
+    - If the new version is incompatible, consider using %gemspec_remove_dep
+      to strip the unwanted dependency from the current version instead of
+      upgrading. Exclude any CLI binaries that need the stripped dep.
+      See obal skill's gemspec-patching.md reference for the full pattern.
   - After updating, verify with rpm -qpR on scratch-built RPMs:
     rpm -qpR <scratch-build-url>.rpm | grep <removed-dep>
     If the removed dep still appears, the consumer needs a version bump too

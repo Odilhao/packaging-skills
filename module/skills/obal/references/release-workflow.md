@@ -213,3 +213,27 @@ koji list-builds --pattern=mypackage*
 ```
 
 **Prevention:** Always use scratch builds to test before releasing.
+
+### Manual Release After Pipeline Failure
+
+When the nightly release pipeline fails (e.g., a dependency wasn't available when a consumer package tried to build), you can manually release packages in the correct order:
+
+```bash
+# Release dependency first
+obal source <dependency-package>
+obal release <dependency-package>
+
+# Then release the consumer
+obal source <consumer-package>
+obal release <consumer-package>
+```
+
+### Cleaning Up Bad Releases
+
+If a bad version was released to COPR, delete it before releasing the fix — dnf picks the highest NVR, so a lower-versioned fix won't be installed while the bad build exists:
+
+```bash
+copr-cli delete-build <build-id>
+```
+
+For detailed recovery procedures including NVR downgrade handling and pipeline behavior, see [Release Recovery](release-recovery.md).

@@ -28,6 +28,10 @@ description: "Packaging automation for obal-managed repos (foreman-packaging, pu
 - Package removal — must verify reverse deps on built RPMs (`rpm -qpR`),
   not just spec files. Gem/pip auto-requires come from upstream metadata.
   Also check if an obsolete entry is needed for clean upgrades.
+- Version downgrade — when reverting a version bump already released to
+  COPR/Koji, the old COPR build must be deleted first (dnf picks highest
+  NVR). CI `rpmdev-vercmp` check will fail on the revert PR — this is
+  expected and can be overridden by maintainers.
 
 ## Review Gate (MANDATORY before any commit)
 
