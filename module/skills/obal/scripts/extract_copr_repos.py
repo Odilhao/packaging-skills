@@ -23,6 +23,34 @@ import sys
 import os
 import json
 import argparse
+import urllib.request
+import urllib.error
+
+
+COPR_API_URL = "https://copr.fedorainfracloud.org/api_3"
+
+
+def fetch_copr_build_info(build_id):
+    """
+    Fetch build details from COPR API to get owner and project names.
+
+    Args:
+        build_id: COPR build ID (e.g., "10591897")
+
+    Returns:
+        Tuple of (ownername, projectname) or None on failure
+    """
+    url = f"{COPR_API_URL}/build/{build_id}"
+    try:
+        with urllib.request.urlopen(url, timeout=15) as resp:
+            data = json.loads(resp.read())
+            owner = data.get('ownername', '').lstrip('@')
+            project = data.get('projectname', '')
+            if owner and project:
+                return (owner, project)
+    except (urllib.error.URLError, json.JSONDecodeError, KeyError):
+        pass
+    return None
 
 
 def convert_to_dist(chroot):
@@ -100,18 +128,42 @@ def extract_copr_repos(package_name, quiet=False):
     # Extract repository information from each build result
     for build_info in build_info_yaml.get('results', []):
         try:
-            module_args = build_info['invocation']['module_args']
             chroot = build_info['chroot']
+            user = None
+            project = None
+
+            # Format 1: direct user/project fields (obal with updated copr_build module)
+            if 'user' in build_info and 'project' in build_info:
+                user = build_info['user']
+                project = build_info['project']
+            # Format 2: invocation.module_args (older Ansible versions)
+            elif 'invocation' in build_info:
+                module_args = build_info['invocation']['module_args']
+                user = module_args['user']
+                project = module_args['project']
+            # Format 3: COPR API lookup using build ID (fallback)
+            else:
+                build_ids = build_info.get('builds', [])
+                if not build_ids:
+                    if not quiet:
+                        print(f"Warning: No build IDs found for chroot {chroot}", file=sys.stderr)
+                    continue
+                api_result = fetch_copr_build_info(build_ids[0])
+                if not api_result:
+                    if not quiet:
+                        print(f"Warning: Could not fetch COPR build info for build {build_ids[0]}", file=sys.stderr)
+                    continue
+                user, project = api_result
 
             repo_url = (
                 f"https://download.copr.fedorainfracloud.org/results/"
-                f"{module_args['user']}/{module_args['project']}/{module_args['chroot']}"
+                f"{user}/{project}/{chroot}"
             )
 
             repos.append({
                 'url': repo_url,
                 'dist': convert_to_dist(chroot),
-                'chroot': chroot  # Include original chroot for reference
+                'chroot': chroot
             })
         except (KeyError, TypeError) as e:
             if not quiet:
