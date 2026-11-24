@@ -17,7 +17,7 @@ RPM packaging workflow automation for Foreman, Katello, and Pulp projects using 
 ### rpm-packager
 **Use for:** End-to-end packaging automation in obal-managed repos. Wires together obal (commands) and packaging-systems-thinker (reasoning) with authority boundaries and a mandatory review gate before commits.
 
-See [agents/rpm-packager.md](agents/rpm-packager.md) for the full agent definition.
+See [rpm-packager.md](https://github.com/Odilhao/packaging-skills/blob/main/module/agents/rpm-packager.md) for the full agent definition.
 
 ## Conventions
 
